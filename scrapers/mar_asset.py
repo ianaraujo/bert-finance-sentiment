@@ -1,7 +1,8 @@
 import re
 import requests
 from bs4 import BeautifulSoup
-from scrapers.base import BaseScraper, headers
+
+from .base import BaseScraper, headers
 
 
 class MarAssetScraper(BaseScraper):

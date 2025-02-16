@@ -1,8 +1,9 @@
 from scrapers.base import BaseScraper
+from scrapers.loader import load_scrapers
 
 def main():
     count = 0
-    for ScraperClass in BaseScraper.registry:
+    for ScraperClass in load_scrapers():
         scraper = ScraperClass()  # instância o scraper específico
         try:
             letters = scraper.scrape()
