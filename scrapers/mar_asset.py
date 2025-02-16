@@ -59,7 +59,7 @@ class MarAssetScraper(BaseScraper):
                     href = a["href"]
                     title = a.get("title", "").strip()
 
-                    letters.append({"title": title, "href": href, "date": self.transform_date(title)})
+                    letters.append({"title": title, "date": self.transform_date(title), "url": href, "content": None})
 
         return letters
 

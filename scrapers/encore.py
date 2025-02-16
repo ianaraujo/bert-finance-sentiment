@@ -106,7 +106,6 @@ class EncoreScraper(BaseScraper):
                 keyword = 'comentário' if content_type == 'video' else 'carta'
                 
                 if keyword in title.lower():
-                    print(title)
                     date = div.find("span", class_="data")
                     a = div.find("a", class_="btn btn-vermais", href=True)
 
@@ -125,9 +124,9 @@ class EncoreScraper(BaseScraper):
                     if text:
                         items.append({
                             "title": title,
-                            "href": href,
                             "date": self.transform_date(date.text),
-                            "text": text
+                            "url": href,
+                            "content": text
                         })
 
         return items
