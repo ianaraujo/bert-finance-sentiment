@@ -1,4 +1,3 @@
-from scrapers.base import BaseScraper
 from scrapers.loader import load_scrapers
 
 def main():
