@@ -2,8 +2,9 @@
 
 - [x] Mar Asset (20)
 - [x] Encore (57)
+- [ ] Dahlia Capital
 - [ ] Guepardo
-- [ ] IP
+- [ ] IP Capital
 - [ ] Opportunity
 - [ ] SPX
 - [ ] Dynamo
