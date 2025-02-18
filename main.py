@@ -1,5 +1,5 @@
 import sqlite3
-import argparse
+
 from scrapers.loader import load_scrapers
 
 class DatabasePipeline:
@@ -19,42 +19,33 @@ class DatabasePipeline:
                 content TEXT
             )
         ''')
-        
+
         self.conn.commit()
         
-    def store(self, letter, allow_update=False):
+    def exists(self, gestora: str, title: str) -> bool:
+        cursor = self.conn.cursor()
+        cursor.execute('SELECT id FROM letters WHERE gestora = ? AND title = ?', (gestora, title))
+        
+        return cursor.fetchone() is not None
+
+    def store(self, letter) -> None:
         cursor = self.conn.cursor()
         
-        # check if letter already exists
-        cursor.execute('SELECT id FROM letters WHERE title = ?', (letter['title'],))
-        existing = cursor.fetchone()
-        
-        if existing:
-            if allow_update:
-                cursor.execute('''
-                    UPDATE letters 
-                    SET content = ?, date = ?, url = ?
-                    WHERE title = ?
-                ''', (letter['content'], letter['date'], letter['url'], letter['title']))
-            return
+        if not self.exists(letter['gestora'], letter['title']):
+            cursor.execute('''
+                INSERT INTO letters (gestora, title, date, url, content)
+                VALUES (?, ?, ?, ?, ?)
+            ''', (letter['gestora'], letter['title'], letter['date'], letter['url'], letter['content']))
             
-        cursor.execute('''
-            INSERT INTO letters (gestora, title, date, url, content)
-            VALUES (?, ?, ?, ?, ?)
-        ''', (letter['gestora'], letter['title'], letter['date'], letter['url'], letter['content']))
-        
-        self.conn.commit()
+            self.conn.commit()
 
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--update', action='store_true', help='Update existing records')
-    args = parser.parse_args()
-
     count = 0
-    pipeline = DatabasePipeline()
-    
+    db = DatabasePipeline()
+
     for ScraperClass in load_scrapers():        
-        scraper = ScraperClass()
+        scraper = ScraperClass(pipeline=db)
+        
         try:
             letters = scraper.scrape()
             len_letters = len(letters)
@@ -63,8 +54,7 @@ def main():
             print(f"{scraper.gestora} ({len_letters})")
 
             for letter in letters:
-                letter["gestora"] = scraper.gestora
-                pipeline.store(letter, allow_update=args.update)
+                db.store(letter)
         
         except Exception as e:
             print(f"Erro no scraper {scraper.gestora}: {e}")

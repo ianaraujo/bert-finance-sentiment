@@ -2,13 +2,15 @@ import re
 import requests
 from bs4 import BeautifulSoup
 
+from main import DatabasePipeline
 from .base import BaseScraper, headers
 
 
 class MarAssetScraper(BaseScraper):
-    def __init__(self):
+    def __init__(self, pipeline: DatabasePipeline):
         self.gestora = "Mar Asset"
         self.base_url = "https://www.marasset.com.br/conteudo-mar/"
+        self.pipeline = pipeline
 
     def transform_date(self, title: str):
         meses = {
@@ -51,15 +53,28 @@ class MarAssetScraper(BaseScraper):
         for div in soup.find_all("div", class_="document--term--item"):
             h4 = div.find("h4")
 
-            if 'Cartas' == h4.get_text():
-                media_div = div.find_all("div", class_="media")
+            if 'Cartas' != h4.get_text():
+                continue
 
-                for media in media_div:
-                    a = media.find("a", href=True)
-                    href = a["href"]
-                    title = a.get("title", "").strip()
+            media_div = div.find_all("div", class_="media")
 
-                    letters.append({"title": title, "date": self.transform_date(title), "url": href, "content": None})
+            for media in media_div:
+                a = media.find("a", href=True)
+                href = a["href"]
+                title = a.get("title", "").strip()
+
+                if self.pipeline.exists(self.gestora, title):
+                    continue
+                
+                letter = {
+                    "gestora": self.gestora,
+                    "title": title,
+                    "date": self.transform_date(title),
+                    "url": href,
+                    "content": ""
+                }
+
+                letters.append(letter)
 
         return letters
 
