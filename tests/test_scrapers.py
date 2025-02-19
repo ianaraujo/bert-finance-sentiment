@@ -2,7 +2,7 @@ import pytest
 import inspect
 from datetime import datetime
 
-from scrapers.loader import load_scrapers
+from services.loader import load_scrapers
 from main import DatabasePipeline
 
 scrapers =  load_scrapers()

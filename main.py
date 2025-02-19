@@ -1,6 +1,6 @@
 import sqlite3
 
-from scrapers.loader import load_scrapers
+from services.loader import load_scrapers
 
 class DatabasePipeline:
     def __init__(self, db_path='letters.db'):
