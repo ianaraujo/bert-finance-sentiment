@@ -15,7 +15,7 @@ def is_valid_date_format(date_str):
         return False
     
 class DummyPipeline(DatabasePipeline):
-    def exists(self):
+    def exists(self, gestora, title):
         # always pretend nothing exists in the DB yet
         return False
 

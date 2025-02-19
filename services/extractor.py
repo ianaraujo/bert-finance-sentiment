@@ -1,6 +1,6 @@
 import io
 import requests
-import PyPDF2
+import pypdf
 
 class PDFTextService:
     def __init__(self, timeout: int = 10):
@@ -12,7 +12,7 @@ class PDFTextService:
             response.raise_for_status()
             
             pdf_bytes = io.BytesIO(response.content)
-            reader = PyPDF2.PdfReader(pdf_bytes)
+            reader = pypdf.PdfReader(pdf_bytes)
             
             extracted_text = ""
 

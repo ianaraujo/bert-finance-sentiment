@@ -31,6 +31,7 @@ class EncoreScraper(BaseScraper):
         }
 
         parts = date_str.split(" de ")
+
         if len(parts) != 3:
             raise ValueError(
                 "Date string does not match expected format 'DD de month de YYYY'")
@@ -151,7 +152,7 @@ class EncoreScraper(BaseScraper):
                     "content": text
                 })
 
-                if limit and len(items) >= limit:
+                if limit and len(items) >= int(limit / 2):
                     return items # for testing purposes
 
         return items
