@@ -1,0 +1,40 @@
+import io
+import requests
+import PyPDF2
+
+class PDFTextService:
+    def __init__(self, timeout: int = 10):
+        self.timeout = timeout
+
+    def extract_text(self, pdf_url: str) -> str:
+        try:
+            response = requests.get(pdf_url, stream=True, timeout=self.timeout)
+            response.raise_for_status()
+            
+            pdf_bytes = io.BytesIO(response.content)
+            reader = PyPDF2.PdfReader(pdf_bytes)
+            
+            extracted_text = ""
+
+            for page in reader.pages:
+                page_text = page.extract_text()
+
+                print(page)
+                print(page_text)
+                print("\n\n")
+                
+                if page_text:
+                    extracted_text += page_text
+            
+            return extracted_text
+        
+        except Exception as e:
+            raise RuntimeError(f"Error extracting text from PDF at {pdf_url}") from e
+
+if __name__ == "__main__":
+    service = PDFTextService()
+    url = "https://www.guepardoinvest.com.br/Carta-76-Carta-aos-Investidores-Mar16.pdf"
+
+    text = service.extract_text(url)
+
+    print("Extracted text:", text)
