@@ -3,12 +3,14 @@ import requests
 from bs4 import BeautifulSoup
 
 from main import DatabasePipeline
+from services.extractor import PDFTextService
 from .base import BaseScraper, headers
 
 
 class GuepardoScraper(BaseScraper):
-    def __init__(self, pipeline: DatabasePipeline):
+    def __init__(self, pipeline: DatabasePipeline, service: PDFTextService):
         self.pipeline = pipeline
+        self.service = service
 
         self.gestora = "Guepardo"
         self.base_url = "https://www.guepardoinvest.com.br/cartas-da-gestora/"
@@ -53,6 +55,18 @@ class GuepardoScraper(BaseScraper):
                 found_month = "01"
 
         return f"{year}-{found_month}-01"
+    
+    def extract_text(self, url: str, title: str) -> str:
+        text = self.service.extract_text(url)
+
+        if text:
+            text = text.replace(title, "")
+            text = re.sub(r'Guepardo Investimentos.*?\+55 \(11\) 3103-9200', '', text, flags=re.DOTALL)
+
+            if "Aviso Legal" in text:
+                text = text.split("Aviso Legal")[0]
+
+        return text
 
     def scrape(self):
         letters = []
@@ -63,25 +77,29 @@ class GuepardoScraper(BaseScraper):
         baixar_links = soup.find_all("span", string=lambda s: s and "baixar pdf" in s.lower())
      
         for span in baixar_links:
-            href = span.find_previous("a").get("href")
             title_tag = span.find_previous(lambda tag: tag.name in ["h3"] and "Relatório de Gestão" in tag.get_text())
             date_tag = span.find_previous(lambda tag: tag.name == "h4")
 
             if not title_tag:
                 continue
-            
+
             title = " ".join([title_tag.get_text(strip=True), date_tag.get_text(strip=True)])
-            date = self.extract_date(date_tag.get_text(strip=True))
             
             if self.pipeline.exists(self.gestora, title):
                 continue
+
+            href = span.find_previous("a").get("href")
+
+            date = self.extract_date(date_tag.get_text(strip=True))
+
+            text = self.extract_text(href, title_tag.get_text(strip=True))
 
             letter = {
                 "gestora": self.gestora,
                 "title": title,
                 "date": date,
                 "url": href,
-                "content": ""
+                "content": text
             }
 
             letters.append(letter)
@@ -91,19 +109,22 @@ class GuepardoScraper(BaseScraper):
             
             if span and "Carta aos Investidores" in span.get_text():
                 title = span.get_text(strip=True)
-                url = li.find("a", href=True)["href"]
-                date = self.extract_date(title)
                 
                 if self.pipeline.exists(self.gestora, title):
                     continue
+                
+                url = li.find("a", href=True)["href"]
+                date = self.extract_date(title)
+                text = self.extract_text(url, title)
 
                 letter = {
                     "gestora": self.gestora,
                     "title": title,
                     "date": date,
                     "url": url,
-                    "content": ""
+                    "content": text
                 }
+
                 letters.append(letter)
 
         return letters
@@ -115,7 +136,11 @@ if __name__ == "__main__":
             return False
 
     pipeline = DummyPipeline()
-    scraper = GuepardoScraper(pipeline)
+    service = PDFTextService()
+
+    scraper = GuepardoScraper(pipeline, service)
     letters = scraper.scrape()
     
     print(len(letters))
+    print(letters[34]["content"])
+    print(letters[36]["content"])

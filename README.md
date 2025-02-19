@@ -16,6 +16,9 @@ Número de cartas por gestora:
 - [ ] Genoa Capital
 - [ ] Kapitalo
 - [ ] Verde
+- [ ] Ártica
+- [ ] Alpha Key
+- [ ] Real Investor
 
 Total: 188 cartas
 

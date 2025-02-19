@@ -6,7 +6,7 @@ class PDFTextService:
     def __init__(self, timeout: int = 10):
         self.timeout = timeout
 
-    def extract_text(self, pdf_url: str) -> str:
+    def extract_text(self, pdf_url: str) -> str | None:
         try:
             response = requests.get(pdf_url, stream=True, timeout=self.timeout)
             response.raise_for_status()
@@ -19,17 +19,14 @@ class PDFTextService:
             for page in reader.pages:
                 page_text = page.extract_text()
 
-                print(page)
-                print(page_text)
-                print("\n\n")
-                
                 if page_text:
                     extracted_text += page_text
             
             return extracted_text
         
         except Exception as e:
-            raise RuntimeError(f"Error extracting text from PDF at {pdf_url}") from e
+            print(f"Failed to extract text from PDF at {pdf_url}: {str(e)}")
+            return None
 
 if __name__ == "__main__":
     service = PDFTextService()
