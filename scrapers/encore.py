@@ -1,6 +1,7 @@
 import re
 import requests
 from bs4 import BeautifulSoup
+from typing import Optional
 from youtube_transcript_api import YouTubeTranscriptApi
 
 from .base import BaseScraper, headers
@@ -107,7 +108,7 @@ class EncoreScraper(BaseScraper):
 
         return text, href
 
-    def _scrape_items(self, content_type: str) -> list[dict]:
+    def _scrape_items(self, content_type: str, limit: Optional[int] = None) -> list[dict]:
         items = []
         for url in self.get_urls():
             response = requests.get(url, headers=headers)
@@ -150,11 +151,14 @@ class EncoreScraper(BaseScraper):
                     "content": text
                 })
 
+                if limit and len(items) >= limit:
+                    return items # for testing purposes
+
         return items
 
-    def scrape(self) -> list[dict]:
-        letters = self._scrape_items('letter')
-        videos = self._scrape_items('video')
+    def scrape(self, limit: Optional[int] = None) -> list[dict]:
+        letters = self._scrape_items('letter', limit)
+        videos = self._scrape_items('video', limit)
 
         return letters + videos
 

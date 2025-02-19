@@ -1,6 +1,7 @@
 import re
 import requests
 from bs4 import BeautifulSoup
+from typing import Optional
 
 from main import DatabasePipeline
 from .base import BaseScraper, headers
@@ -44,7 +45,7 @@ class MarAssetScraper(BaseScraper):
 
         return None
 
-    def scrape(self):
+    def scrape(self, limit: Optional[int] = None):
         response = requests.get(self.base_url, headers=headers)
         soup = BeautifulSoup(response.text, "html.parser")
 
@@ -75,6 +76,9 @@ class MarAssetScraper(BaseScraper):
                 }
 
                 letters.append(letter)
+
+                if limit and len(letters) >= limit:
+                    return letters # for testing purposes
 
         return letters
 

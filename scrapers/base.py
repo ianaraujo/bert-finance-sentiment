@@ -1,3 +1,5 @@
+from typing import Optional
+
 headers = {
     "User-Agent": (
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
@@ -21,11 +23,10 @@ class BaseScraper:
         super().__init_subclass__(**kwargs)
         BaseScraper.registry.append(cls)
 
-    def scrape(self):
+    def scrape(self, limit: Optional[int] = None):
         raise NotImplementedError("O método scrape() deve ser implementado pela subclasse.")
     
 if __name__ == "__main__":
-    print(BaseScraper().registry)
     for ScraperClass in BaseScraper().registry:
         scraper = ScraperClass()
         print(scraper.gestora)

@@ -1,6 +1,7 @@
 import re
 import requests
 from bs4 import BeautifulSoup
+from typing import Optional
 
 from main import DatabasePipeline
 from services.extractor import PDFTextService
@@ -8,9 +9,9 @@ from .base import BaseScraper, headers
 
 
 class GuepardoScraper(BaseScraper):
-    def __init__(self, pipeline: DatabasePipeline, service: PDFTextService):
+    def __init__(self, pipeline: DatabasePipeline, service: Optional[PDFTextService] = None):
         self.pipeline = pipeline
-        self.service = service
+        self.service = service if service else PDFTextService()
 
         self.gestora = "Guepardo"
         self.base_url = "https://www.guepardoinvest.com.br/cartas-da-gestora/"
@@ -68,7 +69,7 @@ class GuepardoScraper(BaseScraper):
 
         return text
 
-    def scrape(self):
+    def scrape(self, limit: Optional[int] = None):
         letters = []
         
         response = requests.get(self.base_url, headers=headers)
@@ -103,6 +104,9 @@ class GuepardoScraper(BaseScraper):
             }
 
             letters.append(letter)
+            
+            if limit and len(letters) >= limit:
+                return letters # for testing purposes
 
         for li in soup.find_all("li"):
             span = li.find("span", class_="elementor-icon-list-text")
