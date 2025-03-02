@@ -90,9 +90,8 @@ class GuepardoScraper(BaseScraper):
                 continue
 
             href = span.find_previous("a").get("href")
-
+            
             date = self.extract_date(date_tag.get_text(strip=True))
-
             text = self.extract_text(href, title_tag.get_text(strip=True))
 
             letter = {

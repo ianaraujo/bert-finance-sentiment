@@ -6,9 +6,9 @@ class PDFTextService:
     def __init__(self, timeout: int = 10):
         self.timeout = timeout
 
-    def extract_text(self, pdf_url: str) -> str | None:
+    def extract_text(self, pdf_url: str, verify: bool=True) -> str | None:
         try:
-            response = requests.get(pdf_url, stream=True, timeout=self.timeout)
+            response = requests.get(pdf_url, stream=True, timeout=self.timeout, verify=verify)
             response.raise_for_status()
             
             pdf_bytes = io.BytesIO(response.content)

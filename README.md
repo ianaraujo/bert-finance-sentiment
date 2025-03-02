@@ -5,8 +5,8 @@ Número de cartas por gestora:
 - [x] Guepardo (111)
 - [x] Encore (57)
 - [x] Mar Asset (20)
-- [ ] Dahlia Capital
 - [ ] IP Capital
+- [ ] Dahlia Capital
 - [ ] Opportunity
 - [ ] SPX
 - [ ] Dynamo
