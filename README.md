@@ -25,3 +25,5 @@ Total: 283 cartas
 ## Questions
 
 - How to prep a GitHub repo for opensource and contributions (PRs)?
+- Finish sentiment metric evals
+- Optimize the sentiment pipeline with datasets

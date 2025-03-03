@@ -9,6 +9,7 @@ dependencies = [
     "beautifulsoup4>=4.13.3",
     "ipykernel>=6.29.5",
     "matplotlib>=3.10.0",
+    "pandas>=2.2.3",
     "pypdf>=5.3.0",
     "pytest>=8.3.4",
     "requests>=2.32.3",
