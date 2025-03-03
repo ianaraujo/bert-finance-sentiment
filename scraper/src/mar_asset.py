@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup
 from typing import Optional
 
 from main import DatabasePipeline
-from .base import BaseScraper, headers
+from ..base import BaseScraper, headers
 
 
 class MarAssetScraper(BaseScraper):

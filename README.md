@@ -3,13 +3,13 @@
 Número de cartas por gestora:
 
 - [x] Guepardo (111)
-- [x] Encore (57)
+- [x] IP Capital (94)
+- [x] Encore (58)
 - [x] Mar Asset (20)
-- [ ] IP Capital
+- [ ] Dynamo
 - [ ] Dahlia Capital
 - [ ] Opportunity
 - [ ] SPX
-- [ ] Dynamo
 - [ ] Tempo Capital
 - [ ] Capstone
 - [ ] Gávea
@@ -20,7 +20,7 @@ Número de cartas por gestora:
 - [ ] Alpha Key
 - [ ] Real Investor
 
-Total: 188 cartas
+Total: 283 cartas
 
 ## Questions
 

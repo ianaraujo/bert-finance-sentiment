@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup
 from typing import Optional
 from youtube_transcript_api import YouTubeTranscriptApi
 
-from .base import BaseScraper, headers
+from ..base import BaseScraper, headers
 from main import DatabasePipeline
 
 

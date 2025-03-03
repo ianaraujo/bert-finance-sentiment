@@ -60,5 +60,5 @@ def test_scraper_output_structure(ScraperClass, dummy_pipeline):
         assert isinstance(letter["gestora"], str), "gestora must be a string"
         assert isinstance(letter["title"], str), "title must be a string"
         assert isinstance(letter["url"], str), "url must be a string"
-        assert isinstance(letter["date"], str) and is_valid_date_format(letter["date"]), "date must be a valid YYYY-MM-DD string"
+        assert (letter["date"] is None) or (isinstance(letter["date"], str) and is_valid_date_format(letter["date"])), "date must be None or a valid YYYY-MM-DD string"
         assert isinstance(letter["content"], str), "content must be a string"

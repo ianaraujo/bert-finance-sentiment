@@ -3,8 +3,9 @@ import requests
 from bs4 import BeautifulSoup
 from typing import List, Dict, Optional
 
-from .base import BaseScraper, headers
-from main import DatabasePipeline
+from main import DatabasePipeline, DummyPipeline
+from ..base import BaseScraper, headers
+from ..utils import extract_date
 from services.extractor import PDFTextService
 
 
@@ -25,7 +26,7 @@ class IPCapitalScrape(BaseScraper):
         self.service = service if service else PDFTextService()
 
 
-    def get_urls(self) -> list[tuple[str, str]]:
+    def get_urls(self, limit: Optional[int] = None) -> list[tuple[str, str]]:
         results = []
         page = 1
         has_content = True
@@ -46,6 +47,9 @@ class IPCapitalScrape(BaseScraper):
                 if pdf_link and pdf_link['href'].endswith('.pdf'):
                     results.append((f'{title} ({date})', pdf_link['href']))
 
+                    if limit and len(results) >= limit:
+                        return results # for testing purposes
+
             load_more = soup.find('a', class_='load-more')
             
             if not load_more:
@@ -55,18 +59,18 @@ class IPCapitalScrape(BaseScraper):
 
         return results
 
-    def scrape(self) -> List[Dict]:
-        results = self.get_urls()
+    def scrape(self, limit: Optional[int] = None) -> List[Dict]:
+        results = self.get_urls(limit=limit)
         
         for title, pdf_url in results:
             try:
-                date = None
+                date = extract_date(title)
                 text = self.service.extract_text(pdf_url, verify=False)
                 
                 letter = {
                     "gestora": self.gestora,
                     "title": title,
-                    "date": '2023-01-01',
+                    "date": date,
                     "url": pdf_url,
                     "content": text
                 }
@@ -79,7 +83,7 @@ class IPCapitalScrape(BaseScraper):
         return self.letters
 
 if __name__ == "__main__":
-    scraper = IPCapitalScrape(pipeline)
+    scraper = IPCapitalScrape(pipeline=DummyPipeline())
     letters = scraper.scrape()
 
     print(len(letters))

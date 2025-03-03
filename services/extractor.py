@@ -1,12 +1,13 @@
 import io
 import requests
 import pypdf
+from typing import Optional
 
 class PDFTextService:
     def __init__(self, timeout: int = 10):
         self.timeout = timeout
 
-    def extract_text(self, pdf_url: str, verify: bool=True) -> str | None:
+    def extract_text(self, pdf_url: str, verify: bool=True) -> Optional[str]:
         try:
             response = requests.get(pdf_url, stream=True, timeout=self.timeout, verify=verify)
             response.raise_for_status()
@@ -33,5 +34,4 @@ if __name__ == "__main__":
     url = "https://www.guepardoinvest.com.br/Carta-76-Carta-aos-Investidores-Mar16.pdf"
 
     text = service.extract_text(url)
-
     print("Extracted text:", text)

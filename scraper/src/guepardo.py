@@ -5,7 +5,8 @@ from typing import Optional
 
 from main import DatabasePipeline
 from services.extractor import PDFTextService
-from .base import BaseScraper, headers
+from ..base import BaseScraper, headers
+from ..utils import extract_date
 
 
 class GuepardoScraper(BaseScraper):
@@ -15,47 +16,6 @@ class GuepardoScraper(BaseScraper):
 
         self.gestora = "Guepardo"
         self.base_url = "https://www.guepardoinvest.com.br/cartas-da-gestora/"
-
-    def extract_date(self, text: str):
-        year_match = re.search(r'(\d{4})', text)
-
-        if year_match:
-            year = year_match.group(1)
-        else:
-            return None
-
-        months = {
-            'janeiro': '01',
-            'fevereiro': '02',
-            'março': '03',
-            'abril': '04',
-            'maio': '05',
-            'junho': '06',
-            'julho': '07',
-            'agosto': '08',
-            'setembro': '09',
-            'outubro': '10',
-            'novembro': '11',
-            'dezembro': '12'
-        }
-
-        found_month = None 
-        
-        for month_name, month_num in months.items():
-            if re.search(month_name, text, re.IGNORECASE):
-                found_month = month_num
-                
-                break
-
-        if not found_month:
-            tri_match = re.search(r'(\d)º\s*Trimestre', text)
-            if tri_match:
-                tri = tri_match.group(1)
-                found_month = {"1": "01", "2": "04", "3": "07", "4": "10"}.get(tri, "01")
-            else:
-                found_month = "01"
-
-        return f"{year}-{found_month}-01"
     
     def extract_text(self, url: str, title: str) -> str:
         text = self.service.extract_text(url)
@@ -91,7 +51,7 @@ class GuepardoScraper(BaseScraper):
 
             href = span.find_previous("a").get("href")
             
-            date = self.extract_date(date_tag.get_text(strip=True))
+            date = extract_date(date_tag.get_text(strip=True))
             text = self.extract_text(href, title_tag.get_text(strip=True))
 
             letter = {
@@ -117,7 +77,7 @@ class GuepardoScraper(BaseScraper):
                     continue
                 
                 url = li.find("a", href=True)["href"]
-                date = self.extract_date(title)
+                date = extract_date(title)
                 text = self.extract_text(url, title)
 
                 letter = {
