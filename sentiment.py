@@ -4,6 +4,7 @@ import torch
 import numpy as np
 from typing import List, Dict, Any, Tuple, Optional
 from contextlib import contextmanager
+from datasets import Dataset
 from transformers import AutoTokenizer, BertForSequenceClassification, pipeline
 
 class SentimentAnalysis:
@@ -29,7 +30,6 @@ class SentimentAnalysis:
 
     @contextmanager
     def _db_connection(self):
-        """Context manager for database connections"""
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
         try:
@@ -39,7 +39,6 @@ class SentimentAnalysis:
             conn.close()
 
     def _execute_query(self, query: str, params: tuple = None, fetch: bool = False) -> Tuple[sqlite3.Connection, sqlite3.Cursor]:
-        """Execute a query and return connection and cursor"""
         with self._db_connection() as (conn, cursor):
             if params:
                 cursor.execute(query, params)
@@ -53,17 +52,16 @@ class SentimentAnalysis:
             return None
 
     def _alter_table(self) -> None:
-        """Add sentiment column if it doesn't exist"""
         with self._db_connection() as (conn, cursor):
             cursor.execute("PRAGMA table_info(letters)")
             columns = [col[1] for col in cursor.fetchall()]
             
             if 'sentiment' not in columns:
                 cursor.execute("ALTER TABLE letters ADD COLUMN sentiment INTEGER")
+                
                 conn.commit()
 
     def read_letters(self, where_clause: str = "") -> List[Dict]:
-        """Read letters from database with optional WHERE clause"""
         with self._db_connection() as (conn, cursor):
             query = "SELECT id, content FROM letters"
             if where_clause:
@@ -75,14 +73,11 @@ class SentimentAnalysis:
             
             return [dict(zip(columns, row)) for row in rows]
     
-    def update_sentiment(self, letter_id: int, sentiment_score: int) -> None:
-        """Update sentiment score for a letter"""
-        self._execute_query(
-            "UPDATE letters SET sentiment = ? WHERE id = ?",
-            (sentiment_score, letter_id)
-        )
 
-    def calculate_score(self, prob: list[list[dict]], w_threshold: float = 0.1, alpha: float = 1.0, normalized: bool = False) -> int:
+    def calculate_score(self, prob: list[list[dict]], alpha: float = 0.5, slope: Optional[float] = None, normalized: bool = True) -> int:
+        self.scores = np.array([])
+        self.weights = np.array([])
+
         for chunk in prob:
             label_scores = {d['label']: d['score'] for d in chunk}
 
@@ -95,9 +90,6 @@ class SentimentAnalysis:
             # weight: w_i = p_pos + p_neg
             w_i = p_pos + p_neg
 
-            if w_i < w_threshold:
-                continue
-
             if normalized and w_i > 0:
                 p_norm_pos = p_pos / w_i
                 p_norm_neg = p_neg / w_i
@@ -106,49 +98,71 @@ class SentimentAnalysis:
             self.scores = np.append(self.scores, s_i)
             self.weights = np.append(self.weights, w_i)
 
+
         if len(self.weights) == 0 or self.weights.sum() == 0:
-            final_score = 50
+            return 50
     
-        else:
-            S = np.sum(self.weights * self.scores) / np.sum(self.weights)  # [-1, +1]
+        S = np.sum(self.weights * self.scores) / np.sum(self.weights)  # [-1, +1]
+        
+        if alpha != 1.0:
+            S = np.sign(S) * (np.abs(S) ** alpha) # [-1, +1]
+
+        if slope:
+            logistic = lambda x, slope: 1 / (1 + np.exp(-slope * x))
             
-            if alpha != 1.0:
-                S = np.sign(S) * (np.abs(S) ** alpha) # [-1, +1]
-            
-            # scale to [0, 100]
-            final_score = int(50.0 * (S + 1.0))
+            S = logistic(S, slope) # [0, 1]
+            final_score = int(S * 100.0) # scale to [0, 100]
+
+        else: 
+            final_score = int(50.0 * (S + 1.0)) # scale to [0, 100]
 
         return final_score
 
     def predict_sentiment(self, letters: List[Dict[str, Any]]) -> None:
-        """Predict sentiment for a list of letters"""
-        for i, letter in enumerate(letters, 1):
-            text = letter['content']
+        dataset = Dataset.from_list(letters)
 
-            if not text:
-                continue
-
-            text = text.replace('\n', ' ').replace('  ', ' ')
-
-            chunks = []
-            sentences = re.split(r'(?<=[.!?])', text)
-
-            for text in sentences:
-                tokens = self.tokenizer(text, add_special_tokens=False)
-                token_length = len(tokens["input_ids"])
+        def process_example(example):
+            text = example["content"]
             
+            if not text:
+                return {"sentiment": 50}
+            
+            chunks = []
+            
+            text = text.replace('\n', ' ').replace('  ', ' ')
+            sentences = re.split(r'(?<=[.!?])', text)
+            
+            for sentence in sentences:
+                tokens = self.tokenizer(sentence, add_special_tokens=False)
+                token_length = len(tokens["input_ids"])
+                
                 if 15 <= token_length <= 500:
-                    chunks.append(text)
+                    chunks.append(sentence)
+            
+            if not chunks:
+                return {"sentiment": 50}
 
-            prob = self.pipeline(chunks, batch_size=12)
-            score = self.calculate_score(prob)
-            self.update_sentiment(letter['id'], score)
+            chunk_dataset = Dataset.from_dict({"text": chunks})
+            text_list = chunk_dataset["text"]
 
-            print(f"Processing letters ({i}/{len(letters)})", end='\r')
+            prob = self.pipeline(text_list, batch_size=64)
+            score = self.calculate_score(prob, alpha=0.75, normalized=True)
+
+            return {"sentiment": score}
+
+        dataset = dataset.map(process_example, batched=False)
+
+        for row in dataset:
+            self._execute_query(
+                "UPDATE letters SET sentiment = ? WHERE id = ?",
+                (row["sentiment"], row["id"])
+            )
+            
+            print(f"Processing letter with id {row['id']}", end='\r')
+
 
     def run(self) -> None:
-        """Run sentiment analysis"""
-        letters = self.read_letters("gestora <> 'Encore'")
+        letters = self.read_letters("gestora <> 'Encore' and content is not null")
         self.predict_sentiment(letters)
 
         print("Sentiment analysis completed")
