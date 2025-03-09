@@ -47,7 +47,7 @@ class DatabasePipeline:
         self.conn.commit()
 
 class DummyPipeline(DatabasePipeline):
-    def exists(self, **kwargs):
+    def exists(self):
         return False
 
 def get_scraper_by_name(name: str):
@@ -62,7 +62,7 @@ def get_scraper_by_name(name: str):
     return None
 
 def main():
-    parser = argparse.ArgumentParser(description='Scrape investment letters')
+    parser = argparse.ArgumentParser(description='Run scrapers to get letters from investment funds managers')
     parser.add_argument('--scraper', type=str, help='Name of the specific scraper to run (e.g., ip_capital)')
     args = parser.parse_args()
 
@@ -77,6 +77,7 @@ def main():
             return
         
         scraper = ScraperClass(pipeline=db)
+        
         print(f"Clearing existing data for {scraper.gestora}...")
         db.clean_data(scraper.gestora)
         
@@ -99,6 +100,7 @@ def main():
                 letters = scraper.scrape()
                 len_letters = len(letters)
                 count += len_letters
+
                 print(f"{scraper.gestora} ({len_letters})")
                 
                 for letter in letters:

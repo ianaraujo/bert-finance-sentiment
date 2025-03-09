@@ -1,14 +1,14 @@
 import re
-import requests
-from bs4 import BeautifulSoup
 from typing import Optional
 
 from main import DatabasePipeline
-from ..base import BaseScraper, headers
+from ..base import BaseScraper
 
 
 class MarAssetScraper(BaseScraper):
+    
     def __init__(self, pipeline: DatabasePipeline):
+        super().__init__()
         self.gestora = "Mar Asset"
         self.base_url = "https://www.marasset.com.br/conteudo-mar/"
         self.pipeline = pipeline
@@ -46,8 +46,7 @@ class MarAssetScraper(BaseScraper):
         return None
 
     def scrape(self, limit: Optional[int] = None):
-        response = requests.get(self.base_url, headers=headers)
-        soup = BeautifulSoup(response.text, "html.parser")
+        soup = self.parse(self.base_url)
 
         letters = []
 

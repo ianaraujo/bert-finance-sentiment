@@ -1,26 +1,23 @@
 import urllib3
-import requests
-from bs4 import BeautifulSoup
 from typing import List, Dict, Optional
 
 from main import DatabasePipeline, DummyPipeline
-from ..base import BaseScraper, headers
+from ..base import BaseScraper
 from ..utils import extract_date
 from services.extractor import PDFTextService
 
-
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
 
 pipeline = DatabasePipeline()
 
 class IPCapitalScrape(BaseScraper):
+
     def __init__(self, pipeline: DatabasePipeline, service: Optional[PDFTextService] = None):
+        super().__init__()
         self.gestora = "IP Capital"
         self.base_url = "https://ip-capitalpartners.com/wp-content/themes/ip-capital/loop-reports.php"
-        self.letters = []  # Initialize as empty list
-        
-        self.session = requests.Session()
-        self.session.headers = headers
+        self.letters = []  # initialize as empty list
 
         self.pipeline = pipeline
         self.service = service if service else PDFTextService()
@@ -33,10 +30,8 @@ class IPCapitalScrape(BaseScraper):
 
         while has_content:
             url = f"{self.base_url}?paged={page}"
-            response = self.session.get(url, headers=headers, verify=False)
-            response.raise_for_status()
 
-            soup = BeautifulSoup(response.text, "html.parser")
+            soup = self.parse(url, verify=False)
             cards = soup.find_all("div", class_="card")
 
             for card in cards:

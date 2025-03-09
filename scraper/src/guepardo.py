@@ -1,16 +1,16 @@
 import re
-import requests
-from bs4 import BeautifulSoup
 from typing import Optional
 
 from main import DatabasePipeline
 from services.extractor import PDFTextService
-from ..base import BaseScraper, headers
+from ..base import BaseScraper
 from ..utils import extract_date
 
 
 class GuepardoScraper(BaseScraper):
+    
     def __init__(self, pipeline: DatabasePipeline, service: Optional[PDFTextService] = None):
+        super().__init__()
         self.pipeline = pipeline
         self.service = service if service else PDFTextService()
 
@@ -32,8 +32,7 @@ class GuepardoScraper(BaseScraper):
     def scrape(self, limit: Optional[int] = None):
         letters = []
         
-        response = requests.get(self.base_url, headers=headers)
-        soup = BeautifulSoup(response.text, "html.parser")
+        soup = self.parse(self.base_url)
         
         baixar_links = soup.find_all("span", string=lambda s: s and "baixar pdf" in s.lower())
      

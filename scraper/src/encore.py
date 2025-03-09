@@ -1,15 +1,15 @@
 import re
-import requests
-from bs4 import BeautifulSoup
 from typing import Optional
 from youtube_transcript_api import YouTubeTranscriptApi
 
-from ..base import BaseScraper, headers
 from main import DatabasePipeline
+from ..base import BaseScraper
 
 
 class EncoreScraper(BaseScraper):
+    
     def __init__(self, pipeline: DatabasePipeline):
+        super().__init__()
         self.gestora = "Encore"
         self.base_url = "https://encore.am/midias/"
         self.pipeline = pipeline
@@ -47,8 +47,7 @@ class EncoreScraper(BaseScraper):
         return f"{year}-{month}-{day:02d}"
 
     def get_urls(self):
-        response = requests.get(self.base_url, headers=headers)
-        soup = BeautifulSoup(response.text, "html.parser")
+        soup = self.parse(self.base_url)
         nav = soup.find("a", class_="last", href=True)
 
         match = re.search(r'/page/(\d+)/', nav["href"])
@@ -112,8 +111,7 @@ class EncoreScraper(BaseScraper):
     def _scrape_items(self, content_type: str, limit: Optional[int] = None) -> list[dict]:
         items = []
         for url in self.get_urls():
-            response = requests.get(url, headers=headers)
-            soup = BeautifulSoup(response.text, "html.parser")
+            soup = self.parse(url)
             
             for div in soup.find_all("div", class_="card-midia"):
                 title = div.find("h3").get_text().strip()
@@ -129,20 +127,17 @@ class EncoreScraper(BaseScraper):
                 date_element = div.find("span", class_="data")
                 a = div.find("a", class_="btn btn-vermais", href=True)
 
-                response_detail = requests.get(a["href"], headers=headers)
-                detail_soup = BeautifulSoup(
-                    response_detail.text, "html.parser")
-
-                content = detail_soup.find("div", class_="content")
+                detail_soup = self.parse(a["href"])
+                detail_content = detail_soup.find("div", class_="content")
 
                 if content_type == 'video':
-                    youtube_id, href = self._process_youtube_content(content)
+                    youtube_id, href = self._process_youtube_content(detail_content)
                     if youtube_id:
                         text = self.get_youtube_text(id=youtube_id)
                     else:
                         text, href = None, None
                 else:
-                    text, href = self._process_letter_content(content)
+                    text, href = self._process_letter_content(detail_content)
 
                 items.append({
                     "gestora": self.gestora,
