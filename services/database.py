@@ -56,6 +56,8 @@ class DatabasePipeline:
             
             self.conn.commit()
 
+        return
+
     def clean_data(self, gestora: str) -> None:
         cursor = self.conn.cursor()
         cursor.execute('DELETE FROM letters WHERE gestora = ?', (gestora,))
@@ -65,5 +67,5 @@ class DatabasePipeline:
 
 class DummyPipeline(DatabasePipeline):
     
-    def exists(self, **kargs) -> tuple:
-        return False, None
+    def exists(self, gestora, title) -> tuple:
+        return False, None, None

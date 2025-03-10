@@ -2,9 +2,12 @@ import re
 from typing import Optional
 from youtube_transcript_api import YouTubeTranscriptApi
 
-from services.database import DatabasePipeline
+from services.database import DatabasePipeline, DummyPipeline
+from services.models import LlamaTextEnhancer
 from ..base import BaseScraper
 
+
+enhancer = LlamaTextEnhancer()
 
 class EncoreScraper(BaseScraper):
     
@@ -116,9 +119,6 @@ class EncoreScraper(BaseScraper):
             for div in soup.find_all("div", class_="card-midia"):
                 title = div.find("h3").get_text().strip()
 
-                if self.pipeline.exists(self.gestora, title):
-                    continue
-
                 keyword = 'comentário' if content_type == 'video' else 'carta'
                 
                 if keyword not in title.lower():
@@ -132,8 +132,10 @@ class EncoreScraper(BaseScraper):
 
                 if content_type == 'video':
                     youtube_id, href = self._process_youtube_content(detail_content)
+                    
                     if youtube_id:
-                        text = self.get_youtube_text(id=youtube_id)
+                        raw_text = self.get_youtube_text(id=youtube_id)
+                        text = enhancer.enhance_text(raw_text)
                     else:
                         text, href = None, None
                 else:
@@ -160,7 +162,10 @@ class EncoreScraper(BaseScraper):
 
 
 if __name__ == "__main__":
-    scraper = EncoreScraper(pipeline=DatabasePipeline())
-    letters = scraper.scrape()
+    scraper = EncoreScraper(pipeline=DummyPipeline())
+    letters = scraper.scrape(limit=5)
 
-    print(len(letters))
+    for letter in letters:
+        print(letter['title'])
+        print(letter['content'])
+        print()
