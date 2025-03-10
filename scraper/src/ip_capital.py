@@ -1,27 +1,25 @@
 import urllib3
 from typing import List, Dict, Optional
 
-from main import DatabasePipeline, DummyPipeline
 from ..base import BaseScraper
 from ..utils import extract_date
+from services.database import DatabasePipeline, DummyPipeline
 from services.extractor import PDFTextService
 
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-
-pipeline = DatabasePipeline()
+pdf = PDFTextService()
 
 class IPCapitalScrape(BaseScraper):
 
-    def __init__(self, pipeline: DatabasePipeline, service: Optional[PDFTextService] = None):
+    def __init__(self, pipeline: DatabasePipeline):
         super().__init__()
+        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+        
         self.gestora = "IP Capital"
         self.base_url = "https://ip-capitalpartners.com/wp-content/themes/ip-capital/loop-reports.php"
         self.letters = []  # initialize as empty list
 
         self.pipeline = pipeline
-        self.service = service if service else PDFTextService()
-
 
     def get_urls(self, limit: Optional[int] = None) -> list[tuple[str, str]]:
         results = []
@@ -60,7 +58,7 @@ class IPCapitalScrape(BaseScraper):
         for title, pdf_url in results:
             try:
                 date = extract_date(title)
-                text = self.service.extract_text(pdf_url, verify=False)
+                text = pdf.extract_text(pdf_url, verify=False)
                 
                 letter = {
                     "gestora": self.gestora,

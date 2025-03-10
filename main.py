@@ -1,54 +1,8 @@
-import sqlite3
 import argparse
 
 from services.loader import load_scrapers
+from services.database import DatabasePipeline, DummyPipeline
 
-class DatabasePipeline:
-    def __init__(self, db_path='letters.db'):
-        self.conn = sqlite3.connect(db_path)
-        self._create_table()
-        
-    def _create_table(self):
-        cursor = self.conn.cursor()
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS letters (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                gestora TEXT,
-                title TEXT,
-                date TEXT,
-                url TEXT,
-                content TEXT
-            )
-        ''')
-
-        self.conn.commit()
-        
-    def exists(self, gestora: str, title: str) -> bool:
-        cursor = self.conn.cursor()
-        cursor.execute('SELECT id FROM letters WHERE gestora = ? AND title = ?', (gestora, title))
-        
-        return cursor.fetchone() is not None
-
-    def store(self, letter) -> None:
-        cursor = self.conn.cursor()
-        
-        if not self.exists(letter['gestora'], letter['title']):
-            cursor.execute('''
-                INSERT INTO letters (gestora, title, date, url, content)
-                VALUES (?, ?, ?, ?, ?)
-            ''', (letter['gestora'], letter['title'], letter['date'], letter['url'], letter['content']))
-            
-            self.conn.commit()
-
-    def clean_data(self, gestora: str) -> None:
-        cursor = self.conn.cursor()
-        cursor.execute('DELETE FROM letters WHERE gestora = ?', (gestora,))
-        
-        self.conn.commit()
-
-class DummyPipeline(DatabasePipeline):
-    def exists(self):
-        return False
 
 def get_scraper_by_name(name: str):
     scrapers = load_scrapers()

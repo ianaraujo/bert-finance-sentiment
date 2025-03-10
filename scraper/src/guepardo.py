@@ -1,24 +1,26 @@
 import re
 from typing import Optional
 
-from main import DatabasePipeline
-from services.extractor import PDFTextService
 from ..base import BaseScraper
 from ..utils import extract_date
+from services.database import DatabasePipeline, DummyPipeline
+from services.extractor import PDFTextService
 
+
+pdf = PDFTextService()
 
 class GuepardoScraper(BaseScraper):
     
-    def __init__(self, pipeline: DatabasePipeline, service: Optional[PDFTextService] = None):
+    def __init__(self, pipeline: DatabasePipeline):
         super().__init__()
-        self.pipeline = pipeline
-        self.service = service if service else PDFTextService()
 
         self.gestora = "Guepardo"
         self.base_url = "https://www.guepardoinvest.com.br/cartas-da-gestora/"
     
+        self.pipeline = pipeline
+
     def extract_text(self, url: str, title: str) -> str:
-        text = self.service.extract_text(url)
+        text = pdf.extract_text(url)
 
         if text:
             text = text.replace(title, "")
@@ -93,10 +95,6 @@ class GuepardoScraper(BaseScraper):
 
 
 if __name__ == "__main__":
-    class DummyPipeline(DatabasePipeline):
-        def exists(self, gestora, title):
-            return False
-
     pipeline = DummyPipeline()
     service = PDFTextService()
 

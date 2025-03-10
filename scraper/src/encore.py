@@ -2,7 +2,7 @@ import re
 from typing import Optional
 from youtube_transcript_api import YouTubeTranscriptApi
 
-from main import DatabasePipeline
+from services.database import DatabasePipeline
 from ..base import BaseScraper
 
 

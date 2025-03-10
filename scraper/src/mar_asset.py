@@ -1,9 +1,12 @@
 import re
 from typing import Optional
 
-from main import DatabasePipeline
 from ..base import BaseScraper
+from services.database import DatabasePipeline
+from services.extractor import PDFTextService
 
+
+pdf = PDFTextService()
 
 class MarAssetScraper(BaseScraper):
     
@@ -60,18 +63,24 @@ class MarAssetScraper(BaseScraper):
 
             for media in media_div:
                 a = media.find("a", href=True)
-                href = a["href"]
+                pdf_url = a["href"]
                 title = a.get("title", "").strip()
 
                 if self.pipeline.exists(self.gestora, title):
                     continue
+
+                try:
+                    text = pdf.extract_text(pdf_url)
+                 
+                except Exception as e:
+                    print(f"Failed to process {pdf_url}: {str(e)}")
                 
                 letter = {
                     "gestora": self.gestora,
                     "title": title,
                     "date": self.transform_date(title),
-                    "url": href,
-                    "content": ""
+                    "url": pdf_url,
+                    "content": text
                 }
 
                 letters.append(letter)
