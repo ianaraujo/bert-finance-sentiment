@@ -6,19 +6,16 @@ Número de cartas por gestora:
 - [x] IP Capital (94)
 - [x] Encore (58)
 - [x] Mar Asset (20)
-- [ ] Dynamo
-- [ ] Dahlia Capital
-- [ ] Opportunity
-- [ ] SPX
-- [ ] Tempo Capital
-- [ ] Capstone
-- [ ] Gávea
 - [ ] Genoa Capital
-- [ ] Kapitalo
-- [ ] Verde
+- [ ] Dahlia Capital
 - [ ] Ártica
+- [ ] Kapitalo
+- [ ] Squadra
 - [ ] Alpha Key
-- [ ] Real Investor
+- [ ] Kadima
+- [ ] Athena Capital
+- [ ] Forpus
+- [ ] Dynamo (sem data)
 
 Total: 283 cartas
 
