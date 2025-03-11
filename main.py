@@ -63,7 +63,10 @@ def main():
             except Exception as e:
                 print(f"Error in scraper {scraper.gestora}: {e}")
 
-    print(f"Total: {count} letters")
+    print(f"Total: {count} new letters")
+    
+    total = db.count_all_letters()
+    print(f"Total letters in database: {total}")
 
 if __name__ == "__main__":
     main()

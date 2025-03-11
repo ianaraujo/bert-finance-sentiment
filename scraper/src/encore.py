@@ -3,11 +3,8 @@ from typing import Optional
 from youtube_transcript_api import YouTubeTranscriptApi
 
 from services.database import DatabasePipeline, DummyPipeline
-from services.models import LlamaTextEnhancer
 from ..base import BaseScraper
 
-
-enhancer = LlamaTextEnhancer()
 
 class EncoreScraper(BaseScraper):
     
@@ -134,8 +131,7 @@ class EncoreScraper(BaseScraper):
                     youtube_id, href = self._process_youtube_content(detail_content)
                     
                     if youtube_id:
-                        raw_text = self.get_youtube_text(id=youtube_id)
-                        text = enhancer.enhance_text(raw_text)
+                        text = self.get_youtube_text(id=youtube_id)
                     else:
                         text, href = None, None
                 else:

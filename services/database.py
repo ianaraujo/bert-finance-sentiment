@@ -64,6 +64,11 @@ class DatabasePipeline:
         
         self.conn.commit()
 
+    def count_all_letters(self) -> int:
+        cursor = self.conn.cursor()
+        cursor.execute('SELECT COUNT(*) FROM letters')
+        return cursor.fetchone()[0]
+
 
 class DummyPipeline(DatabasePipeline):
     
