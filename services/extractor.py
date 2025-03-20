@@ -13,7 +13,7 @@ class PDFTextService:
     def __init__(self, timeout: int = 10):
         self.timeout = timeout
 
-    def extract_text(self, pdf_url: str, verify: bool = True) -> Optional[str]:
+    def extract_text(self, pdf_url: str, verify: bool = True, verbose: bool = True) -> Optional[str]:
         try:
             response = requests.get(
                 pdf_url,
@@ -40,7 +40,9 @@ class PDFTextService:
             return extracted_text
 
         except Exception as e:
-            print(f"Failed to extract text from PDF at {pdf_url}: {str(e)}")
+            if verbose:
+                print(f"Failed to extract text from PDF at {pdf_url}: {str(e)}")
+            
             return None
 
 

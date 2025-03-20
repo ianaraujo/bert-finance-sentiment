@@ -54,5 +54,8 @@ def extract_date(text: str):
 
     if not year or not month:
         return None
+    
+    if year and not month:
+        return f"{year}-01-01"
 
     return f"{year}-{month}-01"
