@@ -29,10 +29,10 @@ def match_month(text: str):
     return None
 
 def match_year(text: str):
-    year_match = re.search(r'(\d{4})', text)
+    year_matches = re.findall(r'(\d{4})', text)
 
-    if year_match:
-        return year_match.group(1)
+    if year_matches:
+        return max(year_matches)
 
     return None
 
@@ -45,17 +45,29 @@ def match_trimester(text: str):
 
     return None
 
+def match_semester(text: str):
+    sem_match = re.search(r'(\d)[ºo]?\s*(?:Sem(?:estre)?)', text, re.IGNORECASE)
+
+    if sem_match:
+        sem = sem_match.group(1)
+        return {"1": "06", "2": "12"}.get(sem, "06")
+
+    return None
+
 def extract_date(text: str):
     year = match_year(text)
     month = match_month(text)
 
     if not month:
         month = match_trimester(text)
-
-    if not year or not month:
-        return None
     
-    if year and not month:
-        return f"{year}-01-01"
+    if not month:
+        month = match_semester(text)
+
+    if not year:
+        return None
+        
+    if not month:
+        return f"{year}-12-01"
 
     return f"{year}-{month}-01"

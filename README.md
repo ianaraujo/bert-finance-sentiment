@@ -10,10 +10,13 @@ Número de cartas por gestora:
 - [x] Encore (58)
 - [x] Genoa Capital (55)
 - [x] Mar Asset (20)
+- [x] Alaska (18)
 - [x] Squadra (17)
 
-Total: 491 cartas
+Total: 509 cartas
 
 ## TO-DO
 
 - Exist logic for all scrapers
+- Learn about PEFT
+- Learn about Datasets

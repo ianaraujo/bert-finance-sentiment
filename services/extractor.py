@@ -36,6 +36,10 @@ class PDFTextService:
 
                 if page_text:
                     extracted_text += page_text
+            
+            extracted_text = extracted_text.strip()
+            extracted_text = extracted_text.replace("\n", " ")
+            extracted_text = " ".join(extracted_text.split())
 
             return extracted_text
 
