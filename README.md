@@ -14,8 +14,6 @@ Número de cartas por gestora:
 
 Total: 491 cartas
 
-## Questions
+## TO-DO
 
-- How to prep a GitHub repo for opensource and contributions (PRs)?
-- Finish sentiment metric evals
-- Optimize the sentiment pipeline with datasets
+- Exist logic for all scrapers
