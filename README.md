@@ -12,6 +12,7 @@ Número de cartas por gestora:
 - [x] Mar Asset (20)
 - [x] Alaska (18)
 - [x] Squadra (17)
+- [ ] Alpha Key ()
 
 Total: 509 cartas
 
