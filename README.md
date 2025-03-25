@@ -13,6 +13,7 @@ Número de cartas por gestora:
 - [x] Alaska (18)
 - [x] Squadra (17)
 - [ ] Alpha Key ()
+- [ ] Kapitalo ()
 
 Total: 509 cartas
 
