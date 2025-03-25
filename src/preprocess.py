@@ -1,4 +1,6 @@
+import os
 import re
+import json
 import sqlite3
 import random
 from typing import List, Dict
@@ -66,7 +68,15 @@ if __name__ == '__main__':
     data = read_data()
     final_data = generate_chunks(data)
 
-    print(f"Generated {len(final_data)} chunks")
-    
     for i in range(11):
         print(f'Example {i}: ', random.choice(final_data))
+
+    print(f"Generated {len(final_data)} chunks")
+
+    os.makedirs('data', exist_ok=True)
+
+    with open('data/domain_training.jsonl', 'w', encoding='utf-8') as f:
+        for chunk in final_data:
+            f.write(json.dumps(chunk, ensure_ascii=False) + '\n')
+
+    print('Data saved to data/domain_training.jsonl')

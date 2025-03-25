@@ -3,7 +3,7 @@ import inspect
 from datetime import datetime
 
 from services.loader import load_scrapers
-from main import DatabasePipeline
+from services.database import DatabasePipeline
 
 scrapers =  load_scrapers()
 

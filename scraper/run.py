@@ -15,7 +15,7 @@ def get_scraper_by_name(name: str):
     
     return None
 
-def main():
+def run():
     parser = argparse.ArgumentParser(description='Run scrapers to get letters from investment funds managers')
     parser.add_argument('--scraper', type=str, help='Name of the specific scraper to run (e.g., ip_capital)')
     args = parser.parse_args()
@@ -69,4 +69,4 @@ def main():
     print(f"Total letters in database: {total}")
 
 if __name__ == "__main__":
-    main()
+    run()
