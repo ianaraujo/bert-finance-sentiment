@@ -174,4 +174,5 @@ cython_debug/
 *.db
 
 # data
-data/
+data/*
+models/*
