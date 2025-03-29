@@ -9,13 +9,13 @@ Número de cartas por gestora:
 - [x] Ártica (61)
 - [x] Encore (58)
 - [x] Genoa Capital (55)
+- [x] Alpha Key (36)
 - [x] Mar Asset (20)
 - [x] Alaska (18)
 - [x] Squadra (17)
-- [ ] Alpha Key ()
 - [ ] Kapitalo ()
 
-Total: 509 cartas
+Total: 545 cartas
 
 ## TO-DO
 
