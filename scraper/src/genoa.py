@@ -35,6 +35,9 @@ class GenoaScraper(BaseScraper):
             if title != 'Carta Mensal':
                 continue
 
+            if self.should_skip(title):
+                continue
+
             p = cols[1].find("p").get_text().strip()
             date = extract_date(p)
 

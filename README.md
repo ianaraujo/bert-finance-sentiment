@@ -15,10 +15,8 @@ Número de cartas por gestora:
 - [x] Alaska (18)
 - [x] Squadra (17)
 
-Total: 545 cartas
+Total: 711 cartas
 
 ## TO-DO
 
-- Exist logic for all scrapers
-- Learn about PEFT
-- Learn about Datasets
+- Fix DahliaCapital scraper

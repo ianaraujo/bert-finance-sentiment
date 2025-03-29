@@ -36,7 +36,10 @@ class AlaskaScraper(BaseScraper):
                     continue
                     
                 body_text = a.get_text(strip=True)
-                title = " - ".join([title_text, body_text])         
+                title = " - ".join([title_text, body_text])
+
+                if self.should_skip(title):
+                    continue
 
                 content = pdf.extract_text(href)
 

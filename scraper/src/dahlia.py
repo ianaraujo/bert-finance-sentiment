@@ -64,7 +64,11 @@ class DahliaScraper(BaseScraper):
     def scrape(self, limit: Optional[int] = None) -> List[Dict]:
         posts = self.find_posts()
 
-        for title, date, url in posts: 
+        for title, date, url in posts:
+            
+            if self.should_skip(title):
+                continue
+
             soup = self.parse(url)
 
             content = soup.find("div", attrs={"data-id": "content-viewer"})

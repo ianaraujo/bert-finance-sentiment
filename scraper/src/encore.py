@@ -116,6 +116,9 @@ class EncoreScraper(BaseScraper):
             for div in soup.find_all("div", class_="card-midia"):
                 title = div.find("h3").get_text().strip()
 
+                if self.should_skip(title):
+                    continue
+
                 keyword = 'comentário' if content_type == 'video' else 'carta'
                 
                 if keyword not in title.lower():

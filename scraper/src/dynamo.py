@@ -54,6 +54,9 @@ class DynamoScraper(BaseScraper):
                 pdf_url = "https://www.dynamo.com.br/" + span["href"]
 
                 title = item.find("h3").get_text(strip=True)
+
+                if self.should_skip(title):
+                    continue
                 
                 text = pdf.extract_text(pdf_url, verbose=False)
                 text = text.replace("-\n", " ").strip() if text else None

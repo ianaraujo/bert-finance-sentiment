@@ -66,7 +66,7 @@ class MarAssetScraper(BaseScraper):
                 pdf_url = a["href"]
                 title = a.get("title", "").strip()
 
-                if self.pipeline.exists(self.gestora, title):
+                if self.should_skip(title):
                     continue
 
                 try:

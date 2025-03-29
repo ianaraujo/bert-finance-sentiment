@@ -35,6 +35,10 @@ class SquadraScraper(BaseScraper):
             h2_tag = item.find("h2")
 
             title = h2_tag.get_text(strip=True) if h2_tag else None
+
+            if self.should_skip(title):
+                continue
+
             pdf_url = h2_tag.find("a", href=True)["href"] if h2_tag else None
 
             text = pdf.extract_text(pdf_url) if pdf_url else None

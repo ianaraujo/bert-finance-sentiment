@@ -45,6 +45,9 @@ class ArticaScraper(BaseScraper):
 
             title = title_span.get_text(strip=True) if title_span else None
 
+            if self.should_skip(title):
+                continue
+
             href = None
             
             for a in item.find_all("a", class_="jet-listing-dynamic-link__link", href=True):

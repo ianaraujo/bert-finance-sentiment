@@ -3,7 +3,7 @@ import inspect
 from datetime import datetime
 
 from services.loader import load_scrapers
-from services.database import DatabasePipeline
+from services.database import DatabasePipeline, DummyPipeline
 
 scrapers =  load_scrapers()
 
@@ -12,11 +12,6 @@ def is_valid_date_format(date_str):
         datetime.strptime(date_str, '%Y-%m-%d')
         return True
     except ValueError:
-        return False
-    
-class DummyPipeline(DatabasePipeline):
-    def exists(self, gestora, title):
-        # always pretend nothing exists in the DB yet
         return False
 
 @pytest.fixture

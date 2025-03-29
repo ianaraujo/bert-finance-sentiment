@@ -56,6 +56,10 @@ class IPCapitalScrape(BaseScraper):
         results = self.get_urls(limit=limit)
         
         for title, pdf_url in results:
+            
+            if self.should_skip(title):
+                continue
+
             try:
                 date = extract_date(title)
                 text = pdf.extract_text(pdf_url, verify=False)

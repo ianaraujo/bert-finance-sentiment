@@ -47,7 +47,7 @@ class GuepardoScraper(BaseScraper):
 
             title = " ".join([title_tag.get_text(strip=True), date_tag.get_text(strip=True)])
             
-            if self.pipeline.exists(self.gestora, title):
+            if self.should_skip(title):
                 continue
 
             href = span.find_previous("a").get("href")

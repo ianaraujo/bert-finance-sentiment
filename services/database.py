@@ -26,11 +26,13 @@ class DatabasePipeline:
         cursor.execute('SELECT id, content FROM letters WHERE gestora = ? AND title = ?', (gestora, title))
         
         data = cursor.fetchone()
+        id = data[0]
+        content = data[1]
         
         if data is None:
             return (False, None, None)
         else:
-            return (True, data[0], data[1])
+            return (True, id, content)
 
     def store(self, letter) -> None:
         exists, id, content = self.exists(letter['gestora'], letter['title'])
@@ -73,4 +75,4 @@ class DatabasePipeline:
 class DummyPipeline(DatabasePipeline):
     
     def exists(self, gestora, title) -> tuple:
-        return False, None, None
+        return (False, None, None)

@@ -32,6 +32,9 @@ class AlphaKeyScraper(BaseScraper):
             href = item["href"]
             title = item.find("h5").get_text(strip=True)
 
+            if self.should_skip(title):
+                continue
+
             date_text = item.find("span").get_text(strip=True)
             date = extract_date(date_text)
 

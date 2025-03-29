@@ -38,8 +38,12 @@ class KapitaloScraper(BaseScraper):
                 date_text = extract_date(text[:100])
 
                 if not date_text:
-                    continue            
+                    continue
+
             title = f"{title_text} - {month_text} {date_text[0:4]}"
+
+            if self.should_skip(title):
+                continue
 
             letter = {
                 "gestora": self.gestora,
