@@ -38,12 +38,17 @@ class AlphaKeyScraper(BaseScraper):
             date_text = item.find("span").get_text(strip=True)
             date = extract_date(date_text)
 
+            text = pdf.extract_text(href)
+            
+            if not text:
+                continue
+
             letter = {
                 "gestora": self.gestora,
                 "title": title,
                 "date": date,
                 "url": href,
-                "content": pdf.extract_text(href)
+                "content": text
             }
 
             self.letters.append(letter)

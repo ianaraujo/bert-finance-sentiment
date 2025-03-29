@@ -26,12 +26,12 @@ class DatabasePipeline:
         cursor.execute('SELECT id, content FROM letters WHERE gestora = ? AND title = ?', (gestora, title))
         
         data = cursor.fetchone()
-        id = data[0]
-        content = data[1]
         
         if data is None:
             return (False, None, None)
         else:
+            id = data[0]
+            content = data[1]
             return (True, id, content)
 
     def store(self, letter) -> None:
