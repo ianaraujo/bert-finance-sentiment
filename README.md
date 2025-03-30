@@ -1,5 +1,17 @@
 # LLM Equity Market Sentiment Analysis
 
+```bash
+docker run -it --gpus all \
+  -v /home/ubuntu/llm-asset-sentiment/data:/app/data \
+  -v /home/ubuntu/llm-asset-sentiment/models:/app/models \
+  trainer \
+  python3 train_domain.py
+```
+
+14:36
+
+## Scraper
+
 Número de cartas por gestora:
 
 - [x] Guepardo (111)

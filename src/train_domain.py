@@ -1,11 +1,12 @@
 import json
 import math
+import torch
 import random
 import argparse
 from typing import List, Dict
 
 from datasets import Dataset, DatasetDict
-from peft import LoraConfig, get_peft_model
+# from peft import LoraConfig, get_peft_model
 
 from transformers import (
     AutoTokenizer, 
@@ -19,25 +20,26 @@ from transformers import (
 
 class DomainTrainer:
 
-    def __init__(self, model_name: str, path: str, smoke_test: bool = False) -> None:
+    def __init__(self, base_model: str, path: str, smoke_test: bool = False) -> None:
         self.path = path
 
-        self.model = AutoModelForMaskedLM.from_pretrained(model_name)
-        self.tokenizer = AutoTokenizer.from_pretrained(model_name, do_lower_case=False)
+        self.base_model = AutoModelForMaskedLM.from_pretrained(base_model)
+        self.tokenizer = AutoTokenizer.from_pretrained(base_model, do_lower_case=False)
 
-        self.lora_config = LoraConfig(
-            r=8,             # Rank
-            lora_alpha=32,   # LoRA alpha
-            target_modules=["query", "value"], # BERT-based models
-            lora_dropout=0.05,
-            bias="none",
-            # task_type=TaskType.MASKED_LM
-        )
+        self.model_name = 'bert-portuguese-asset-management'
+
+        # self.lora_config = LoraConfig(
+        #     r=8,             # Rank
+        #     lora_alpha=32,   # LoRA alpha
+        #     target_modules=["query", "value"], # BERT-based models
+        #     lora_dropout=0.05,
+        #     bias="none",
+        # )
 
         self.training_args = TrainingArguments(
-            output_dir="models/bert-portuguese-asset-management",
+            output_dir=f"models/{self.model_name}",
             overwrite_output_dir=True,
-            evaluation_strategy="epoch",
+            eval_strategy="epoch",
             learning_rate=1e-4,
             per_device_train_batch_size=16,
             per_device_eval_batch_size=16,
@@ -57,9 +59,15 @@ class DomainTrainer:
 
             # turn off checkpoint saving for speed
             self.training_args.save_steps = 999999
+            self.training_args.save_strategy = "no"
 
             # rreduce or turn off logging
             self.training_args.logging_steps = 5
+
+        print("Using device:", torch.device("cuda" if torch.cuda.is_available() else "cpu"))
+
+        if torch.cuda.is_available():
+            print("GPU:", torch.cuda.get_device_name(0))
 
     def _tokenize_function(self, examples) -> PreTrainedTokenizer:
         return self.tokenizer(
@@ -110,30 +118,19 @@ class DomainTrainer:
             remove_columns=["text"]
         )
 
-        peft_model = get_peft_model(self.model, self.lora_config)
+        # peft_model = get_peft_model(self.model, self.lora_config)
 
-        peft_model.print_trainable_parameters() # print()
+        # peft_model.print_trainable_parameters() # print()
 
         data_collator = DataCollatorForLanguageModeling(
             tokenizer=self.tokenizer, 
             mlm=True, 
             mlm_probability=0.15
         )
-        
-        # evaluate the base model
-        base_trainer = Trainer(
-            model=self.model,
-            args=self.training_args,
-            eval_dataset=tokenized_dataset['validation'],
-            data_collator=data_collator
-        )
-
-        base_eval_results = base_trainer.evaluate()
-        print(f"Base Model Perplexity: {math.exp(base_eval_results['eval_loss']):.2f}")
 
         # create a new trainer for fine-tuning the PEFT model
         trainer = Trainer(
-            model=peft_model,
+            model=self.base_model,
             args=self.training_args,
             train_dataset=tokenized_dataset['train'],
             eval_dataset=tokenized_dataset['validation'],
@@ -143,8 +140,11 @@ class DomainTrainer:
         trainer.train()
 
         eval_results = trainer.evaluate()
-        print(eval_results)
-        # print(f">>> Perplexity Post-Training: {math.exp(eval_results['eval_loss']):.2f}")
+        
+        if 'eval_loss' in eval_results:
+            print(f"Perplexity: {math.exp(eval_results['eval_loss']):.2f}")
+
+        trainer.save_model(f"models/{self.model_name}")
 
 
 if __name__ == '__main__':
@@ -152,10 +152,10 @@ if __name__ == '__main__':
     parser.add_argument('--smoke-test', action='store_true', help='Run in smoke test mode (fast training with sample data)')
     args = parser.parse_args()
 
-    model_name = "neuralmind/bert-base-portuguese-cased"
+    base_model = "neuralmind/bert-base-portuguese-cased"
     path = 'data/domain_training.jsonl'
 
-    trainer = DomainTrainer(model_name, path, smoke_test=args.smoke_test)
+    trainer = DomainTrainer(base_model, path, smoke_test=args.smoke_test)
 
     trainer.run()
 
