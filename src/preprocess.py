@@ -1,8 +1,10 @@
 import os
 import re
 import json
+import csv
 import sqlite3
 import random
+import argparse
 from typing import List, Dict
 
 conn = sqlite3.connect('letters.db')
@@ -89,8 +91,26 @@ def generate_chunks(data: List, min_size: int = 10, max_size: int = 500, thresho
     
     return chunks
     
+def create_random_sample(chunks_data: List[Dict], output_file: str, sample_size: int = 1000) -> None:
+    sample_size = min(sample_size, len(chunks_data))
+
+    sample = random.sample(chunks_data, sample_size)
+
+    # write sample to CSV
+    with open(output_file, 'w', newline='', encoding='utf-8') as csvfile:
+        writer = csv.writer(csvfile)
+        # write header
+        writer.writerow(['text', 'label'])
+        # write rows (label is left empty)
+        for chunk in sample:
+            writer.writerow([chunk['text'], ''])
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Process letters data and optionally export CSV sample.')
+    parser.add_argument('--export', action='store_true', help='Export a random CSV sample of chunk data.')
+    parser.add_argument('--path', type=str, help='Path to the CSV output file.')
+
+    args = parser.parse_args()
     data = read_data()
     chunks_data = generate_chunks(data)
 
@@ -106,3 +126,7 @@ if __name__ == '__main__':
             f.write(json.dumps(chunk, ensure_ascii=False) + '\n')
 
     print('Data saved to data/domain_training.jsonl')
+
+    if args.export:
+        create_random_sample(chunks_data, sample_size=1000, output_file=args.path)
+        print(f'Random sample of chunks saved to {args.path}')
