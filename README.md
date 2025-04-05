@@ -55,7 +55,3 @@ Número de cartas por gestora:
 - [x] Squadra (17)
 
 Total: 711 cartas
-
-## TO-DO
-
-- Fix DahliaCapital scraper

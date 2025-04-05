@@ -26,9 +26,27 @@ def read_data() -> List:
     return data
 
 def sanitize_text(text: str) -> str:
-    text = text.replace("-\n", "")
+
+    substitutions = {
+        "Œ": "ê",
+        "ªo": "ão",
+        "Æ": "á",
+        "Ø": "é",
+        "ª": "ã",
+    }
+
+    for k, v in substitutions.items():
+        text = text.replace(k, v)
+
+    # remover separações hifenizadas entre linhas
+    text = re.sub(r'(\w+)-\n(\w+)', r'\1\2', text)
+
+    # remover quebras de linha no meio de frases
+    text = re.sub(r'(?<!\n)\n(?!\n)', ' ', text)
+
     text = text.replace("\n", " ")
     text = " ".join(text.split())
+
     text = text.strip()
     
     return text
@@ -55,7 +73,7 @@ def split_transcription(text: str, chunk_size: int = 500, overlap: int = 5) -> L
 
     return chunks
 
-def generate_chunks(data: List, min_size: int = 10, max_size: int = 500, threshold: float = 0.1) -> List[Dict]:
+def generate_chunks(data: List, min_size: int = 20, max_size: int = 500, threshold: float = 0.05) -> List[Dict]:
     chunks: List[Dict] = []
     
     for row in data:
@@ -63,9 +81,9 @@ def generate_chunks(data: List, min_size: int = 10, max_size: int = 500, thresho
         gestora, title = row[0], row[1]
 
         if gestora == 'Encore' and 'Comentário' in title:
-            sentences = split_transcription(text)
-        else:
-            sentences = split_pattern.split(text)
+            continue
+            
+        sentences = split_pattern.split(text)
 
         for sentence in sentences:
             sentence = sanitize_text(sentence)

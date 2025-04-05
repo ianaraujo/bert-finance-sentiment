@@ -59,7 +59,6 @@ class DynamoScraper(BaseScraper):
                     continue
                 
                 text = pdf.extract_text(pdf_url, verbose=False)
-                text = text.replace("-\n", " ").strip() if text else None
 
                 if not text:
                     continue
@@ -100,3 +99,9 @@ if __name__ == "__main__":
     letters = scraper.scrape(limit=None)
     
     print(len(letters))
+
+    for letter in sample(letters, 5):
+        print(letter["title"])
+        print(letter["url"])
+        print(repr(letter["content"][:100]))
+        print()
