@@ -16,7 +16,7 @@ RUN pip3 install --upgrade pip
 
 RUN pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu126
 
-RUN pip3 install transformers datasets peft
+RUN pip3 install transformers datasets peft scikit-learn
 
 # Now copy the rest of your source code
 # (But we won't copy the /data or /models directories; those will be mounted as volumes)

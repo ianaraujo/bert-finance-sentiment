@@ -43,8 +43,8 @@ Número de cartas por gestora:
 
 - [x] Guepardo (111)
 - [x] IP Capital (95)
-- [x] Dynamo (87)
 - [x] Dahlia Capital (81)
+- [x] Dynamo (80)
 - [x] Kapitalo (74)
 - [x] Ártica (62)
 - [x] Encore (58)
@@ -54,4 +54,4 @@ Número de cartas por gestora:
 - [x] Alaska (18)
 - [x] Squadra (17)
 
-Total: 711 cartas
+Total: 707 cartas

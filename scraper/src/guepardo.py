@@ -96,11 +96,8 @@ class GuepardoScraper(BaseScraper):
 
 if __name__ == "__main__":
     pipeline = DummyPipeline()
-    service = PDFTextService()
 
-    scraper = GuepardoScraper(pipeline, service)
-    letters = scraper.scrape()
+    scraper = GuepardoScraper(pipeline)
+    letters = scraper.scrape(limit=None)
     
     print(len(letters))
-    print(letters[34]["content"])
-    print(letters[36]["content"])

@@ -3,6 +3,7 @@ import math
 import torch
 import random
 import argparse
+import warnings
 from typing import List, Dict
 
 from datasets import Dataset, DatasetDict
@@ -14,8 +15,12 @@ from transformers import (
     AutoModelForMaskedLM, 
     TrainingArguments, 
     Trainer, 
-    DataCollatorForLanguageModeling
+    DataCollatorForLanguageModeling,
+    logging,
 )
+
+logging.set_verbosity_error()
+warnings.filterwarnings("ignore", message="Can't initialize NVML")
 
 
 class DomainTrainer:
@@ -29,14 +34,6 @@ class DomainTrainer:
         self.tokenizer = AutoTokenizer.from_pretrained(base_model, do_lower_case=False)
 
         self.model_name = 'bert-portuguese-asset-management'
-
-        # self.lora_config = LoraConfig(
-        #     r=8,             # Rank
-        #     lora_alpha=32,   # LoRA alpha
-        #     target_modules=["query", "value"], # BERT-based models
-        #     lora_dropout=0.05,
-        #     bias="none",
-        # )
 
         self.training_args = TrainingArguments(
             output_dir=f"models/{self.model_name}",
@@ -115,10 +112,6 @@ class DomainTrainer:
             batched=True,
             remove_columns=["text"]
         )
-
-        # peft_model = get_peft_model(self.model, self.lora_config)
-
-        # peft_model.print_trainable_parameters() # print()
 
         data_collator = DataCollatorForLanguageModeling(
             tokenizer=self.tokenizer, 

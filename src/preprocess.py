@@ -120,7 +120,7 @@ def create_random_sample(chunks_data: List[Dict], output_file: str, sample_size:
         writer.writerow(['text', 'label'])
         # write rows (label is left empty)
         for chunk in sample:
-            writer.writerow([chunk['text'], ''])
+            writer.writerow([chunk['text'], '[LABEL]'])
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Process letters data and optionally export CSV sample.')
@@ -134,6 +134,7 @@ if __name__ == '__main__':
     for i in range(11):
         print(f'Example {i}: ', random.choice(chunks_data))
 
+    print()
     print(f"Generated {len(chunks_data)} chunks from {len(data)} letters.")
 
     os.makedirs('data', exist_ok=True)
