@@ -23,6 +23,8 @@ class DomainTrainer:
     def __init__(self, base_model: str, path: str, smoke_test: bool = False) -> None:
         self.path = path
 
+        self.base_model_name = base_model
+
         self.base_model = AutoModelForMaskedLM.from_pretrained(base_model)
         self.tokenizer = AutoTokenizer.from_pretrained(base_model, do_lower_case=False)
 
@@ -46,7 +48,7 @@ class DomainTrainer:
             num_train_epochs=3,
             weight_decay=0.01,
             logging_steps=100,
-            save_steps=1000,
+            save_strategy="no",
             fp16=True
         )
 
@@ -56,10 +58,6 @@ class DomainTrainer:
 
             self.training_args.per_device_train_batch_size = 4
             self.training_args.per_device_eval_batch_size = 4
-
-            # turn off checkpoint saving for speed
-            self.training_args.save_steps = 999999
-            self.training_args.save_strategy = "no"
 
             # rreduce or turn off logging
             self.training_args.logging_steps = 5
@@ -139,11 +137,27 @@ class DomainTrainer:
 
         trainer.train()
 
-        eval_results = trainer.evaluate()
+        eval_results_ft = trainer.evaluate()
         
-        if 'eval_loss' in eval_results:
-            print(f"Perplexity: {math.exp(eval_results['eval_loss']):.2f}")
+        if 'eval_loss' in eval_results_ft:
+            print(f"Fine-tuned model Perplexity: {math.exp(eval_results_ft['eval_loss']):.2f}")
 
+        # reload the original base model for evaluation
+        base_model_original = AutoModelForMaskedLM.from_pretrained(self.base_model_name)
+        
+        base_trainer = Trainer(
+            model=base_model_original,
+            args=self.training_args,
+            eval_dataset=tokenized_dataset['validation'],
+            data_collator=data_collator
+        )
+
+        eval_results_base = base_trainer.evaluate()
+        
+        if 'eval_loss' in eval_results_base:
+            print(f"Base model Perplexity: {math.exp(eval_results_base['eval_loss']):.2f}")
+
+        # save the fine-tuned model
         trainer.save_model(f"models/{self.model_name}")
 
 

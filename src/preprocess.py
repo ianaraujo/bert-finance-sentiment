@@ -18,7 +18,9 @@ def read_data() -> List:
         '''
         SELECT gestora, title, content 
         FROM letters
-        WHERE content IS NOT NULL AND content <> ''
+        WHERE content IS NOT NULL 
+            AND content <> ''
+            AND (gestora <> 'Encore' AND title NOT LIKE '%Comentário%')
         '''
     )
     data = cursor.fetchall()
@@ -79,9 +81,6 @@ def generate_chunks(data: List, min_size: int = 20, max_size: int = 500, thresho
     for row in data:
         text = row[2]
         gestora, title = row[0], row[1]
-
-        if gestora == 'Encore' and 'Comentário' in title:
-            continue
             
         sentences = split_pattern.split(text)
 
@@ -135,7 +134,7 @@ if __name__ == '__main__':
     for i in range(11):
         print(f'Example {i}: ', random.choice(chunks_data))
 
-    print(f"Generated {len(chunks_data)} chunks")
+    print(f"Generated {len(chunks_data)} chunks from {len(data)} letters.")
 
     os.makedirs('data', exist_ok=True)
 
