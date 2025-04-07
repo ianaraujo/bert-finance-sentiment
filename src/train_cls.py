@@ -174,10 +174,7 @@ if __name__ == '__main__':
 
     domain_checkpoint = "models/bert-portuguese-asset-management"  # from domain trainer
 
-    if args.smoke_test:
-        sentiment_data_path = "data/cls_training_sample.csv"  # path to your sentiment data
-    else:
-        sentiment_data_path = "data/cls_training.csv"
+    sentiment_data_path = "data/cls_training_sample.csv" if args.smoke_test else "data/cls_training.csv"
     
     sentiment_trainer = SentimentTrainer(
         domain_model=domain_checkpoint,
