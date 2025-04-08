@@ -40,8 +40,8 @@ class DomainTrainer:
             overwrite_output_dir=True,
             eval_strategy="epoch",
             learning_rate=1e-4,
-            per_device_train_batch_size=16,
-            per_device_eval_batch_size=16,
+            per_device_train_batch_size=8,
+            per_device_eval_batch_size=8,
             num_train_epochs=3,
             weight_decay=0.01,
             logging_steps=100,
@@ -159,7 +159,7 @@ if __name__ == '__main__':
     parser.add_argument('--smoke-test', action='store_true', help='Run in smoke test mode (fast training with sample data)')
     args = parser.parse_args()
 
-    base_model = "neuralmind/bert-base-portuguese-cased"
+    base_model = "neuralmind/bert-base-portuguese-cased" if args.smoke_test else "neuralmind/bert-large-portuguese-cased"
     path = 'data/domain_training.jsonl'
 
     trainer = DomainTrainer(base_model, path, smoke_test=args.smoke_test)

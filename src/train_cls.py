@@ -22,6 +22,23 @@ logging.set_verbosity_error()
 warnings.filterwarnings("ignore", message="Can't initialize NVML")
 
 
+class WeightedTrainer(Trainer):
+    def compute_loss(self, model, inputs, num_items_in_batch=None, return_outputs=False):
+        labels = inputs.get("labels")
+        # forward pass
+        outputs = model(**inputs)
+        logits = outputs.get("logits")
+        
+        # define class weights (classes 0 and 1 are penalized twice as much as class 2)
+        class_weights = torch.tensor([2.0, 2.0, 1.0], device=logits.device)
+        
+        # create the weighted cross entropy loss
+        loss_fct = torch.nn.CrossEntropyLoss(weight=class_weights)
+        loss = loss_fct(logits.view(-1, self.model.config.num_labels), labels.view(-1))
+        
+        return (loss, outputs) if return_outputs else loss
+
+
 class SentimentTrainer(DomainTrainer):
     def __init__(self, domain_model: str, sentiment_data_path: str, num_labels: int = 3, smoke_test: bool = False):
         self.domain_model = domain_model
@@ -40,8 +57,8 @@ class SentimentTrainer(DomainTrainer):
         self.model.config.id2label = {0: "NEGATIVE", 1: "POSITIVE", 2: "NEUTRAL"}
 
         self.lora_config = LoraConfig(
-            r=8,             # Rank
-            lora_alpha=32,   # LoRA alpha
+            r=32,             # Rank
+            lora_alpha=64,   # LoRA alpha
             target_modules=["query", "value"], # BERT-based models
             lora_dropout=0.05,
             bias="none",
@@ -51,10 +68,10 @@ class SentimentTrainer(DomainTrainer):
         self.training_args = TrainingArguments(
             overwrite_output_dir=True,
             eval_strategy="epoch",
+            num_train_epochs=7,
             learning_rate=1e-4,
-            per_device_train_batch_size=16,
-            per_device_eval_batch_size=16,
-            num_train_epochs=3,
+            per_device_train_batch_size=32,
+            per_device_eval_batch_size=32,
             weight_decay=0.01,
             logging_steps=50,
             save_strategy="no",
@@ -98,7 +115,7 @@ class SentimentTrainer(DomainTrainer):
         peft_model = get_peft_model(self.model, self.lora_config)
         peft_model.print_trainable_parameters() # print()
 
-        trainer = Trainer(
+        trainer = WeightedTrainer(
             model=peft_model,
             args=self.training_args,
             train_dataset=tokenized_ds["train"],
@@ -127,7 +144,7 @@ class SentimentTrainer(DomainTrainer):
 
         base_model.to(torch.device("cuda" if torch.cuda.is_available() else "cpu"))
         
-        base_trainer = Trainer(
+        base_trainer = WeightedTrainer(
             model=base_model,
             args=self.training_args,
             eval_dataset=tokenized_ds["test"],
@@ -152,7 +169,7 @@ class SentimentTrainer(DomainTrainer):
         benchmark_model.config.problem_type = "single_label_classification"
         benchmark_model.to(torch.device("cuda" if torch.cuda.is_available() else "cpu"))
         
-        benchmark_trainer = Trainer(
+        benchmark_trainer = WeightedTrainer(
             model=benchmark_model,
             args=self.training_args,
             eval_dataset=tokenized_ds["test"],

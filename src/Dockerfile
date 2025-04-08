@@ -25,6 +25,8 @@ COPY . /app
 # By default, the container will start in /app
 WORKDIR /app
 
+ENV PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+
 # This is optional if you want a default command:
 # CMD ["python3", "src/train_domain.py"]
 # Typically we'll override this with our own 'docker run' command.
