@@ -159,7 +159,7 @@ if __name__ == '__main__':
     parser.add_argument('--smoke-test', action='store_true', help='Run in smoke test mode (fast training with sample data)')
     args = parser.parse_args()
 
-    base_model = "neuralmind/bert-base-portuguese-cased" if args.smoke_test else "neuralmind/bert-large-portuguese-cased"
+    base_model = "neuralmind/bert-base-portuguese-cased"
     path = 'data/domain_training.jsonl'
 
     trainer = DomainTrainer(base_model, path, smoke_test=args.smoke_test)
