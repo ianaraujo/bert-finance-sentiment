@@ -923,7 +923,7 @@ wheels = [
 ]
 
 [[package]]
-name = "llm-asset-sentiment"
+name = "bert-finance-sentiment"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [

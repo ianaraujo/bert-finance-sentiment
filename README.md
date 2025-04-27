@@ -6,8 +6,8 @@ docker build -t trainer .
 
 ```bash
 docker run -it --gpus all \
-  -v /home/ubuntu/llm-asset-sentiment/data:/app/data \
-  -v /home/ubuntu/llm-asset-sentiment/models:/app/models \
+  -v /home/ubuntu/bert-finance-sentiment/data:/app/data \
+  -v /home/ubuntu/bert-finance-sentiment/models:/app/models \
   trainer \
   python3 train_domain.py
 ```
