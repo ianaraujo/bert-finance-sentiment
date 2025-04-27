@@ -136,6 +136,7 @@ if __name__ == '__main__':
 
     print()
     print(f"Generated {len(chunks_data)} chunks from {len(data)} letters.")
+    print(f"Average chunk size: {sum(len(chunk['text']) for chunk in chunks_data) / len(chunks_data):.2f} characters.")
 
     os.makedirs('data', exist_ok=True)
 
