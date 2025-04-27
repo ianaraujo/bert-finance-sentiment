@@ -1,4 +1,4 @@
-# LLM Equity Market Sentiment Analysis
+# AI Finance Market Sentiment Analysis
 
 ```bash
 docker build -t trainer .
